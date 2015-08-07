@@ -17,33 +17,69 @@
     </div>
     <div id="table"></div>
     <script>
-      var eventSelect = $('#eventSelect').MPEventSelect();
-      var propSelect  = $('#propSelect').MPPropertySelect();
       var dateSelect  = $('#dateSelect').MPDatepicker();
       var eventGraph  = $('#graph').MPChart({chartType: 'line'});
       var eventTable  = $('#table').MPTable({
         showPercentages: true,
         firstColHeader: 'Event'
       });
+      
+      var params = {
+        to: '2015-01-01',
+        from: '2015-01-01',
+        type: 'general',
+        unit: 'week'
+      };
 
       var runQuery = function() {
-        var eventName = eventSelect.MPEventSelect('value'),
-            propName  = propSelect.MPPropertySelect('value'),
+        var eventName = 'Donation Successfully',
+            propName  = 'donationAmount',
             dateRange = dateSelect.MPDatepicker('value');
+            
+        params['from'] = dateRange.from.toISOString().substring(0, 10);
+        params['to'] = dateRange.to.toISOString().substring(0, 10);
+        var initial, unique;
 
-        if (eventName) {
-          MP.api.segment(eventName, propName, dateRange).done(function(results) {
-            eventGraph.MPChart('setData', results);
-            eventTable.MPTable('setData', results);
-          });
-        }
+        MP.api.segment(eventName, propName, params).done(function(results) {
+          initial = results.values();
+        });
+        
+        MP.api.query('/api/2.0/events/', {event: ['Donation Successfully'], unit: 'week'}, {dataType: 'json'}).done(function(results) {
+          unique = results['data']['values']['Donation Successfully'];
+        });
+        
+        setTimeout(function() { calculateResults(initial, unique) }, 5000);
       };
-      eventSelect.on('change', function(e, eventName) {
-        propSelect.MPPropertySelect('setEvent', eventName);
-        $("#by").show();
-        runQuery();
-      });
-      propSelect.on('change', runQuery);
+      
+      var calculateResults = function(initial, unique) { 
+        var total = {};
+        var final = {};
+        var keys1 = Object.keys(initial);
+        for(i=0; i<keys1.length; i++) {
+          if(keys1[i] != 'undefined') {
+            var subkeys = Object.keys(initial[keys1[i]]);
+            for(j=0; j<subkeys.length; j++) {
+              if(i==0) {
+                total[subkeys[j]] = 0;
+              }
+              total[subkeys[j]] += parseInt(keys1[i]) * parseInt(initial[keys1[i]][subkeys[j]]);
+            }
+          }
+        }
+        var totalkeys = Object.keys(total);
+        for(k=0; k<totalkeys.length; k++) {
+          if(unique[totalkeys[k]] != 0) {
+            final[totalkeys[k]] = total[totalkeys[k]] / unique[totalkeys[k]];
+          } else {
+            final[totalkeys[k]] = 0;
+          }
+        }
+        eventGraph.MPChart('setData', final);
+        eventTable.MPTable('setData', final);
+      }
+      
+      runQuery();
+      
       dateSelect.on('change', runQuery);
     </script>
   </body>
