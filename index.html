@@ -66,14 +66,16 @@
             }
           }
         }
+        final['ARPU'] = {};
         var totalkeys = Object.keys(total);
         for(k=0; k<totalkeys.length; k++) {
           if(unique[totalkeys[k]] != 0) {
-            final[totalkeys[k]] = total[totalkeys[k]] / unique[totalkeys[k]];
+            final['ARPU'][totalkeys[k]] = total[totalkeys[k]] / unique[totalkeys[k]];
           } else {
-            final[totalkeys[k]] = 0;
+            final['ARPU'][totalkeys[k]] = 0;
           }
         }
+        console.log(final);
         eventGraph.MPChart('setData', final);
         eventTable.MPTable('setData', final);
       }
