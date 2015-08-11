@@ -74,6 +74,8 @@
         }
         final['ARPU'] = {};
         var totalkeys = Object.keys(total);
+        console.log(unique);
+        console.log(sumunique);
         for(k=0; k<totalkeys.length; k++) {
           if(unique[totalkeys[k]] != 0) {
             final['ARPU'][totalkeys[k]] = total[totalkeys[k]] / sumunique;
