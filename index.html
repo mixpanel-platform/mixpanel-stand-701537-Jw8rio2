@@ -44,6 +44,7 @@
           initial = results.values();
         });
         
+        params['from'] = '2015-07-16';
         MP.api.query('/api/2.0/events/', {event: ['Donation Successfully'], unit: 'week'}, {dataType: 'json'}).done(function(results) {
           unique = results['data']['values']['Donation Successfully'];
         });
@@ -66,11 +67,16 @@
             }
           }
         }
+        var sumunique = 0;
+        var keys2 = Object.keys(unique);
+        for(j=0; j<keys2.length; j++) {
+          sumunique += unique[keys2[j]];
+        }
         final['ARPU'] = {};
         var totalkeys = Object.keys(total);
         for(k=0; k<totalkeys.length; k++) {
           if(unique[totalkeys[k]] != 0) {
-            final['ARPU'][totalkeys[k]] = total[totalkeys[k]] / unique[totalkeys[k]];
+            final['ARPU'][totalkeys[k]] = total[totalkeys[k]] / sumunique;
           } else {
             final['ARPU'][totalkeys[k]] = 0;
           }
